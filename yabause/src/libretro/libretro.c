@@ -973,6 +973,10 @@ bool retro_load_game_common()
 #endif
    yinit.mpegpath                  = NULL;
    yinit.frameskip                 = g_frame_skip;
+   /* RetroArch paces the frames, so the core's own 60 Hz limiter (sleep and
+    * spin in VDP2) would only cap fast-forward. Auto-frameskip measures
+    * time inside that limiter, so it keeps it. */
+   yinit.framelimit                = g_frame_skip ? 0 : 1;
    yinit.rbg_resolution_mode       = g_rbg_resolution_mode;
    yinit.rbg_use_compute_shader    = g_rbg_use_compute_shader;
    yinit.usethreads                = 0;
@@ -1349,6 +1353,7 @@ void retro_run(void)
          EnableAutoFrameSkip();
       else
          DisableAutoFrameSkip();
+      VDP2SetFrameLimit(g_frame_skip ? 0 : 1);
    }
 
    //YabauseExec(); runs from handle events
