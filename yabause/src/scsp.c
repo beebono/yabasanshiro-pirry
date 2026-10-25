@@ -6092,6 +6092,9 @@ void ScspAsynMainCpuTime( void * p ){
   now = 0;
   before = 0;
   while (thread_running){
+    /* One video frame of 68k cycles, which follows the video format the same
+       way as in ScspAsynMainRealtime (NTSC 735 samples, PAL 882). */
+    framecnt = yabsys.IsPal ? 225792 : 188160;
     if (g_scsp_lock) LadetonParken();   /* lock loop with park notification */
     u64 m68k_done_counter = 0;
     u64 m68k_integer_part = 0;

@@ -984,7 +984,11 @@ bool retro_load_game_common()
    yinit.use_new_scsp              = 1;
    yinit.scsp_sync_count_per_frame = 1;
    yinit.extend_backup             = 1;
-   yinit.scsp_main_mode            = 1;
+   /* The SCSP thread in lockstep with the emulation (0): it pushes each
+    * frame's audio inside retro_run and stops while the frontend is paused.
+    * The realtime mode (1) runs off the wall clock and keeps feeding
+    * audio_batch_cb from its own thread whatever the frontend is doing. */
+   yinit.scsp_main_mode            = 0;
    yinit.videoformattype           = VIDEOFORMATTYPE_NTSC;
    yinit.video_filter_type         = 0;
 
