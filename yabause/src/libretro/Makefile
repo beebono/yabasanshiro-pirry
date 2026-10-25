@@ -96,7 +96,11 @@ else ifeq ($(platform), arm64)
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC
 	SHARED := -shared -Wl,--no-undefined -Wl,--version-script=link.T
-	LDFLAGS += -lpthread -lGL
+	LDFLAGS += -lpthread
+	# GLES builds take libGLESv2 below instead
+	ifneq ($(FORCE_GLES), 1)
+		LDFLAGS += -lGL
+	endif
 	FLAGS +=  -DAARCH64
 	ARCH_IS_LINUX = 1
 	HAVE_SSE = 0
@@ -369,6 +373,7 @@ endif
 
 ifeq ($(ARCH_IS_LINUX), 1)
 	FLAGS += -DARCH_IS_LINUX=1
+	FLAGS += -DHAVE_STRCASECMP
 endif
 
 ifeq ($(ARCH_IS_MACOSX), 1)

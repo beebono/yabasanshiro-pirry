@@ -669,7 +669,7 @@ void retro_get_system_info(struct retro_system_info *info)
    info->library_version  = "v" VERSION GIT_VERSION;
    info->need_fullpath    = true;
    info->block_extract    = false;
-   info->valid_extensions = "cue|iso|mds|ccd";
+   info->valid_extensions = "cue|iso|mds|ccd|chd";
 }
 
 void check_variables(void)

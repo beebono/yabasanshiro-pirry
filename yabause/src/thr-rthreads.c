@@ -161,6 +161,26 @@ void YabAddEventQueue( YabEventQueue * queue_t, int evcode )
 	scond_broadcast(queue->cond_empty);
 }
 
+int YabAddEventQueueNichtBlockend( YabEventQueue * queue_t, int evcode )
+{
+	YabEventQueue_rthreads * queue = (YabEventQueue_rthreads*)queue_t;
+	slock_lock(queue->mutex);
+	if (queue->size == queue->capacity)
+	{
+		/* Full: the consumer is already awake and will drain the whole queue
+		   on its next run; waiting here could deadlock the caller. */
+		slock_unlock(queue->mutex);
+		return 0;
+	}
+	queue->buffer[queue->in] = evcode;
+	++ queue->size;
+	++ queue->in;
+	queue->in %= queue->capacity;
+	slock_unlock(queue->mutex);
+	scond_broadcast(queue->cond_empty);
+	return 1;
+}
+
 int YabClearEventQueue(YabEventQueue * queue_t)
 {
 	YabEventQueue_rthreads * queue = (YabEventQueue_rthreads*)queue_t;
