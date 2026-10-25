@@ -842,10 +842,11 @@ void retro_set_controller_port_device(unsigned port, unsigned device)
    }
 }
 
+/* Save states go through a temporary file; ScspLockThread() holds the
+ * sound thread, which in the lockstep mode is already parked between
+ * frames, where the frontend calls these. */
 size_t retro_serialize_size(void)
 {
-   // Disabling savestates until they are safe
-   return 0;
    void *buffer;
    size_t size;
 
@@ -860,14 +861,20 @@ size_t retro_serialize_size(void)
 
 bool retro_serialize(void *data, size_t size)
 {
-   // Disabling savestates until they are safe
-   return true;
    void *buffer;
    size_t out_size;
 
    int error = YabSaveStateBuffer (&buffer, &out_size);
 
-   memcpy(data, buffer, size);
+   /* the frontend sized data from an earlier state: never read past this
+    * one, and fail rather than truncate */
+   if (!error && out_size > size)
+      error = -1;
+   if (!error)
+   {
+      memcpy(data, buffer, out_size);
+      memset((char*)data + out_size, 0, size - out_size);
+   }
 
    free(buffer);
    return !error;
@@ -875,8 +882,6 @@ bool retro_serialize(void *data, size_t size)
 
 bool retro_unserialize(const void *data, size_t size)
 {
-   // Disabling savestates until they are safe
-   return true;
    int error = YabLoadStateBuffer(data, size);
    retro_set_resolution();
 
